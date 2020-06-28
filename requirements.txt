@@ -1,5 +1,4 @@
 alembic==1.0.11
-coverage==4.5.3
 Flask==1.1.1
 Flask-Migrate==2.5.2
 Flask-RESTful==0.3.7
