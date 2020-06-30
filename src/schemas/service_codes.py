@@ -1,16 +1,23 @@
 """Service code schemas to assist with service code / plan serialization"""
-from marshmallow import fields, Schema
+from src.schemas.schema import ma
+from src.models.service_codes import Plan, ServiceCode
 
 
-class PlanSchema(Schema):
+class PlanSchema(ma.SQLAlchemySchema):
     """Schema class to handle serialization of plan data"""
-    id = fields.String()
-    description = fields.String()
-    enabled = fields.Boolean()
+    class Meta:
+        model = Plan
+        include_fk = True
+ 
+    id = ma.auto_field()
+    description = ma.auto_field()
 
 
-class ServiceCodeSchema(Schema):
+class ServiceCodeSchema(ma.SQLAlchemySchema):
     """Schema class to handle serialization of simplified service code data"""
-    name = fields.String()
-    value = fields.String()
-    description = fields.String()
+    class Meta:
+        model = ServiceCode
+        include_fk = True
+    
+    name = ma.auto_field()
+    description = ma.auto_field()

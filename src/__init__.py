@@ -34,8 +34,11 @@ def create_app(config_obj=None):
         if app.config["FLASK_ENV"] == 'development':
             migrate.init_app(app, db, render_as_batch=True)
         else:
-    migrate.init_app(app, db)
+            migrate.init_app(app, db)
 
+    from src.schemas.schema import ma
+    ma.init_app(app)
+    
     from src.routes import register_routes
     register_routes(app)
 

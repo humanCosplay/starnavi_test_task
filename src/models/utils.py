@@ -1,5 +1,4 @@
 """Utilities for models to inherit or use"""
-from sqlalchemy.exc import SQLAlchemyError
 from flask import abort
 from http import HTTPStatus
 
@@ -18,7 +17,8 @@ def get_object_or_404(model, mid):
         404: if one object is returned from query
 
     """
-    try:
-        return model.query.one(pk=mid)
-    except SQLAlchemyError:
+    obj = model.query.get(mid)
+    if obj:
+        return obj
+    else:
         abort(404)
