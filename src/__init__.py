@@ -2,7 +2,6 @@
 import logging.config
 
 from flask import Flask
-from sqlalchemy import orm
 
 
 def create_app(config_obj=None):
@@ -31,6 +30,10 @@ def create_app(config_obj=None):
     db.init_app(app)
     db.app = app
 
+    with app.app_context():
+        if app.config["FLASK_ENV"] == 'development':
+            migrate.init_app(app, db, render_as_batch=True)
+        else:
     migrate.init_app(app, db)
 
     from src.routes import register_routes
