@@ -23,7 +23,9 @@ class PlanVersionFactory(factory.Factory):
     end_effective_date = factory.Sequence(lambda month: datetime.now() + timedelta(days=30*(month + 1)))
     created_date = factory.LazyFunction(datetime.now)
     plan = factory.SubFactory("tests.factories.PlanFactory")
-    subscription = factory.SubFactory("tests.factories.SubscriptionFactory")
+    subscription = factory.SubFactory("tests.factories.SubscriptionFactory",
+                                       versions=None,
+                                       current_plan = factory.SelfAttribute("..plan"))
 
 
 class SubscriptionFactory(factory.Factory):
@@ -40,12 +42,6 @@ class SubscriptionFactory(factory.Factory):
         factory_related_name="subscription",
         size=1
     )
-    @factory.post_generation
-    def set_current_plan(obj, create, extracted, **kwargs):
-        if not create:
-            return
-        obj.current_plan = obj.versions[0].plan
-        return obj
 
 
 class PlanFactory(factory.Factory):
