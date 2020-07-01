@@ -34,8 +34,8 @@ class SubscriptionFactory(factory.Factory):
 
     phone_number = factory.Faker('phone_number')
     status = SubscriptionStatus.new
-    activation_date = factory.Sequence(lambda month: datetime.now() + timedelta(days=30*month))
-    expiry_date = factory.Sequence(lambda month: datetime.now() + timedelta(days=30*(month + 1)))
+    activation_date = factory.Faker('past_date', start_date='-60d')
+    expiry_date = factory.Faker('future_date', end_date='+60d')
 
     versions = factory.RelatedFactoryList(
         PlanVersionFactory,
