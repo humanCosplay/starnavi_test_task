@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from src.models.versions import PlanVersion
 from tests.model_tests.test_cycles import db_cycles
 
+
 def test_get_version_from_db(db_session, plan_version_factory):
     plan_versions = plan_version_factory.create_batch(5)
     db_session.add_all(plan_versions)
@@ -60,3 +61,18 @@ def test_create_version_manually_for_short_sub(
     default_version = PlanVersion(plan=plan, subscription=subscription)
     assert default_version.start_effective_date == subscription.activation_date
     assert default_version.end_effective_date == subscription.expiry_date
+
+
+def test_create_version_manually_with_dates(
+    db_session, db_cycles,
+    plan, subscription):\
+
+    start_date = datetime.now()
+    end_date = datetime.now() + timedelta(days=30)
+
+    default_version = PlanVersion(plan=plan,
+                                  subscription=subscription,
+                                  start_effective_date=start_date,
+                                  end_effective_date=end_date)
+    assert default_version.start_effective_date == start_date
+    assert default_version.end_effective_date == end_date
