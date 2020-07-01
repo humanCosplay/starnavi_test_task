@@ -3,11 +3,14 @@ import pytest
 import config
 
 from pytest_factoryboy import register
-from tests.factories import BillingCycleFactory
+from tests.factories import BillingCycleFactory, SubscriptionFactory, PlanFactory, PlanVersionFactory
 from src import create_app
 from src.models.base import db
 
 register(BillingCycleFactory)
+register(SubscriptionFactory)
+register(PlanFactory)
+register(PlanVersionFactory)
 
 
 @pytest.fixture(scope="session")

@@ -1,7 +1,5 @@
 """Plans and Service related models and database functionality"""
 from flask import current_app
-from sqlalchemy import and_, or_
-from sqlalchemy.dialects.postgresql import ARRAY
 from src.models.base import db
 
 # Join table for Subscription and ServiceCode

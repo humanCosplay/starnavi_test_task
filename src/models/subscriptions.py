@@ -1,12 +1,11 @@
 """Subscription related models and database functionality"""
-from datetime import datetime
+import datetime
 from enum import Enum
-
 from sqlalchemy.dialects.postgresql import ENUM
-
 from src.models.base import db
-from src.models.service_codes import ServiceCode, subscriptions_service_codes
+from src.models.service_codes import subscriptions_service_codes, Plan
 from src.models.usages import DataUsage
+from src.models.versions import PlanVersion
 
 
 class SubscriptionStatus(Enum):
@@ -24,20 +23,20 @@ class Subscription(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     phone_number = db.Column(db.String(10))
-    status = db.Column(ENUM(SubscriptionStatus), default=SubscriptionStatus.new)
+    status = db.Column(ENUM(SubscriptionStatus),
+                       default=SubscriptionStatus.new)
     activation_date = db.Column(db.TIMESTAMP(timezone=True), nullable=True)
     expiry_date = db.Column(db.TIMESTAMP(timezone=True), nullable=True)
-
-    plan_id = db.Column(db.String(30), db.ForeignKey("plans.id"), nullable=False)
-    plan = db.relationship("Plan", foreign_keys=[plan_id], lazy="select")
+    current_plan_id = db.Column(db.ForeignKey("plans.id"), nullable=False)
     service_codes = db.relationship(
         "ServiceCode", secondary=subscriptions_service_codes,
         primaryjoin="Subscription.id==subscriptions_service_codes.c.subscription_id",
         secondaryjoin="ServiceCode.id==subscriptions_service_codes.c.service_code_id",
         back_populates="subscriptions", cascade="all,delete", lazy="subquery"
     )
-
     data_usages = db.relationship(DataUsage, back_populates="subscription")
+    versions = db.relationship(PlanVersion, back_populates="subscription")
+    current_plan = db.relationship(Plan)
 
     def __repr__(self):  # pragma: no cover
         return (
@@ -65,3 +64,26 @@ class Subscription(db.Model):
     def service_code_names(self):
         """Helper property to return names of active service codes"""
         return [code.name for code in self.service_codes]
+
+    def activate_subscription(self):
+        if self.status == SubscriptionStatus.active:
+            return (self.activation_date, False)
+
+        self.status = SubscriptionStatus.active
+        self.activation_date = datetime.datetime.now()
+        self.expiry_date = self.activation_date + datetime.timedelta(days=30)
+        db.session.add(self)
+        return (self.activation_date, True)
+
+    def suspend_subscription(self):
+        if self.status == SubscriptionStatus.suspended:
+            return (self.expiry_date, False)
+
+        self.status = SubscriptionStatus.suspended
+        db.session.add(self)
+        return (self.expiry_date, True)
+
+    def choose_plan(self, plan: Plan):
+        self.current_plan = plan
+        self.versions.append(PlanVersion(subscription=self, plan=plan))
+        db.session.add(self)
