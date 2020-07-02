@@ -18,6 +18,40 @@ def query_subscription_plans(billing_cycle_id, subscription_id=None):
     (https://www.sphinx-doc.org/en/1.7/ext/example_google.html)
 
     """
+    def local_min_plan(date):
+        """
+        Returns a minimum plan.
+        Result set should be sorted by MB for more efficienty.
+        """
+        for result_row in result_set:
+            if date >= result_row[1] and date <= result_row[2]:
+                return result_row
+        else:
+            return None
+
+    def set_proper_start_date(result, new_local_min_end_date):
+        """
+        Updates an actual effective date of current plan after detecting a new one
+        """
+        prev_plan, prev_start_date, prev_end_date = result[-1]
+        if prev_start_date < new_local_min_end_date:
+            prev_start_date = new_local_min_end_date + timedelta(days=1)
+            result[-1] = (prev_plan, prev_start_date, prev_end_date)
+
+    def lookup_all_local_min_in_timeline(cycle):
+        """
+        Traverses timeline by day from cycle's end to cycle's start and
+        looks up in sorted result_set minimum plan.
+        """
+        result = []
+        for day in range((cycle.end_date - cycle.start_date).days):
+            local_min = local_min_plan(cycle.end_date - timedelta(days=day))
+            if local_min and local_min not in result:
+                if result:
+                    set_proper_start_date(result, local_min[2])
+                result.append(local_min)
+        return result
+
     cycle = BillingCycle.query.get(billing_cycle_id)
     result_set = db.session.query(Plan.mb_available,
                                   PlanVersion.start_effective_date,
@@ -31,17 +65,4 @@ def query_subscription_plans(billing_cycle_id, subscription_id=None):
                                      desc(PlanVersion.end_effective_date)).\
                             all()
 
-    def local_min_plan(date):
-        for result_row in result_set:
-            if date >= result_row[1] and date <= result_row[2]:
-                return result_row
-        else:
-            return None
-
-    result = []
-    for day in range((cycle.end_date - cycle.start_date).days):
-        local_min = local_min_plan(cycle.end_date - timedelta(days=day))
-        if local_min and local_min not in result:
-            result.append(local_min)
-
-    return result
+    return lookup_all_local_min_in_timeline(cycle)
