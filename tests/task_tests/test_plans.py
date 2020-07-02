@@ -1,6 +1,7 @@
 import pytest
 from datetime import timedelta
 from src.models.versions import PlanVersion
+from src.models.subscriptions import SubscriptionStatus
 from src.tasks.plans import query_subscription_plans
 
 
@@ -48,6 +49,7 @@ def version_pair(db_session, cycle, sub, plan_set, shifts):
 
 
 @pytest.mark.parametrize("subscription__versions", [[]])
+@pytest.mark.parametrize("subscription__status", [SubscriptionStatus.active])
 def test_get_subscribtion_plan(db_session, plans, cycles, subscription):
     sub = subscription
 
@@ -115,3 +117,30 @@ def test_subscribtion_plan_joined(db_session, plans, cycles, subscription):
 
     for res, version in zip(query_result, expected):
         assert compare_query_result_tuple(res, version)
+
+
+def test_subscribtion_plan_default(db_session, subscription_factory, plans, cycles):
+    subs = subscription_factory.create_batch(5, versions=[], status=SubscriptionStatus.active)
+    pv = [PlanVersion(subscription=sub, plan=plan) for sub, plan in zip(subs, plans)]
+
+    db_session.add_all(subs)
+    db_session.add_all(pv)
+    db_session.commit()
+
+    query_result = query_subscription_plans(cycles[0].id)
+    assert len(query_result) == len(pv)
+    for sub, plan in zip(subs, plans):
+        assert plan.mb_available in query_result
+        assert query_result[plan.mb_available] == [sub.id]
+
+
+def test_subscribtion_plan_default_for_not_active(db_session, subscription_factory, plans, cycles):
+    subs = subscription_factory.create_batch(5, versions=[], status=SubscriptionStatus.suspended)
+    pv = [PlanVersion(subscription=sub, plan=plan) for sub, plan in zip(subs, plans)]
+
+    db_session.add_all(subs)
+    db_session.add_all(pv)
+    db_session.commit()
+
+    query_result = query_subscription_plans(cycles[0].id)
+    assert len(query_result) == 0

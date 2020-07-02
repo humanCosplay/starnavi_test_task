@@ -19,8 +19,8 @@ class PlanVersionFactory(factory.Factory):
     class Meta:
         model = PlanVersion
 
-    start_effective_date = factory.Sequence(lambda month: datetime.now() + timedelta(days=30*month))
-    end_effective_date = factory.Sequence(lambda month: datetime.now() + timedelta(days=30*(month + 1)))
+    start_effective_date = factory.Faker('past_date', start_date='-60d')
+    end_effective_date = factory.Faker('future_date', end_date='+60d')
     created_date = factory.LazyFunction(datetime.now)
     plan = factory.SubFactory("tests.factories.PlanFactory")
     subscription = factory.SubFactory("tests.factories.SubscriptionFactory",
