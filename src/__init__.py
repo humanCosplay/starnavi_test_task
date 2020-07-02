@@ -29,7 +29,7 @@ def create_app(config_obj=None):
     from src.models.base import db, migrate
     db.init_app(app)
     db.app = app
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, render_as_batch=app.config['FLASK_ENV'] == 'development')
 
     from src.schemas.schema import ma
     ma.init_app(app)

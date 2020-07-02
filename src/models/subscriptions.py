@@ -85,3 +85,17 @@ class Subscription(db.Model):
         self.current_plan = plan
         self.versions.append(PlanVersion(subscription=self, plan=plan))
         db.session.add(self)
+
+    def select_effective_plan(self, date):
+        def lookup_by_date(version, date):
+            return version.start_effective_date <= date \
+                and version.end_effective_date >= date
+
+        def mb_sorted(versions):
+            return sorted(versions, key=lambda v: v.plan.mb_available)
+
+        for v in mb_sorted(self.versions):
+            if lookup_by_date(v, date):
+                return v.plan
+        else:
+            return None

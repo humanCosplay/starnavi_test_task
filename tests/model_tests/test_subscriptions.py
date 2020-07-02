@@ -1,6 +1,8 @@
 import pytest
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from src.models.subscriptions import SubscriptionStatus
+from src.models.versions import PlanVersion
+from tests.model_tests.test_cycles import db_cycles
 
 
 def test_activate_subscription(db_session, subscription):
@@ -31,3 +33,16 @@ def test_activate_subscription_suspend(db_session, subscription):
     expiry_date, is_suspended = sub.suspend_subscription()
     assert is_suspended
     assert old_date == expiry_date
+
+
+@pytest.mark.parametrize("subscription__versions", [[]])
+def test_select_effective_plan_for_subscription(db_cycles, subscription, plan_factory):
+    sub = subscription
+    plans = plan_factory.create_batch(2)
+    sub.activate_subscription()
+    for plan in plans:
+        PlanVersion(subscription=sub, plan=plan)
+
+    expected_plan = min(plans, key=lambda plan: plan.mb_available)
+    result = sub.select_effective_plan(datetime.now())
+    assert expected_plan == result
