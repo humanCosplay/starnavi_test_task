@@ -1,5 +1,5 @@
 """Subscription related models and database functionality"""
-import datetime
+from datetime import datetime, date, timedelta
 from enum import Enum
 from sqlalchemy.dialects.postgresql import ENUM
 from src.models.base import db
@@ -27,7 +27,6 @@ class Subscription(db.Model):
                        default=SubscriptionStatus.new)
     activation_date = db.Column(db.TIMESTAMP(timezone=True), nullable=True)
     expiry_date = db.Column(db.TIMESTAMP(timezone=True), nullable=True)
-    current_plan_id = db.Column(db.ForeignKey("plans.id"), nullable=False)
     service_codes = db.relationship(
         "ServiceCode", secondary=subscriptions_service_codes,
         primaryjoin="Subscription.id==subscriptions_service_codes.c.subscription_id",
@@ -36,7 +35,6 @@ class Subscription(db.Model):
     )
     data_usages = db.relationship(DataUsage, back_populates="subscription")
     versions = db.relationship(PlanVersion, back_populates="subscription")
-    current_plan = db.relationship(Plan)
 
     def __repr__(self):  # pragma: no cover
         return (
@@ -70,8 +68,8 @@ class Subscription(db.Model):
             return (self.activation_date, False)
 
         self.status = SubscriptionStatus.active
-        self.activation_date = datetime.datetime.now()
-        self.expiry_date = self.activation_date + datetime.timedelta(days=30)
+        self.activation_date = datetime.now()
+        self.expiry_date = self.activation_date + timedelta(days=30)
         db.session.add(self)
         return (self.activation_date, True)
 

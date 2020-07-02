@@ -24,8 +24,7 @@ class PlanVersionFactory(factory.Factory):
     created_date = factory.LazyFunction(datetime.now)
     plan = factory.SubFactory("tests.factories.PlanFactory")
     subscription = factory.SubFactory("tests.factories.SubscriptionFactory",
-                                       versions=None,
-                                       current_plan = factory.SelfAttribute("..plan"))
+                                       versions=None)
 
 
 class SubscriptionFactory(factory.Factory):
