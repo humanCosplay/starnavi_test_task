@@ -1,6 +1,6 @@
-"""
-Smoke test module of test system.
-Checks it's basic behavior and could serve as example for future test modules.
+"""Smoke test module of test system.
+
+Checks its basic behavior and could serve as an example for future test modules.
 """
 import pytest
 from src.models.cycles import BillingCycle
@@ -18,8 +18,8 @@ def db_cycles(db_session, billing_cycle_factory):
 
 
 def test_get_cycle(db_session, db_cycles):
-    """
-    First test of test system's transactional behavior via db_session.
+    """ First test of test system's transactional behavior via db_session.
+
     db_session is a mocked SQLAlchemy fixture from pytest-flask-sqlalchemy.
     """
     cycle = db_session.query(BillingCycle).first()
@@ -27,8 +27,8 @@ def test_get_cycle(db_session, db_cycles):
 
 
 def test_get_cycle_again(db_session, billing_cycle_factory):
-    """
-    Second test of transactional behavior.
+    """ Second test of transactional behavior.
+
     Check your pytest-flask-sqlalchemy configuration if test fails.
     """
     cycle = db_session.query(BillingCycle).all()

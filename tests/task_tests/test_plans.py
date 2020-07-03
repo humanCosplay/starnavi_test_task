@@ -1,3 +1,4 @@
+"""Unit test module for src.tasks.plan."""
 import pytest
 from datetime import timedelta
 from src.models.versions import PlanVersion
@@ -7,6 +8,14 @@ from src.tasks.plans import query_subscription_plans
 
 @pytest.fixture(scope="function")
 def plans(db_session,  plan_factory):
+    """ Pytest fixture for setting up test.
+
+    Reset PlanFactory and fill db with test Plan instances.
+
+    Returns:
+        List of Plan instances.
+
+    """
     plans = plan_factory.create_batch(5)
     db_session.add_all(plans)
     db_session.commit()
@@ -15,6 +24,14 @@ def plans(db_session,  plan_factory):
 
 @pytest.fixture(scope="function")
 def cycles(db_session, billing_cycle_factory):
+    """ Pytest fixture for setting up test.
+
+    Resets factory and fill db with test date.
+
+    Returns:
+        List of BillingCycle instances.
+
+    """
     billing_cycle_factory.reset_sequence(0)
     cycles = billing_cycle_factory.create_batch(5)
     db_session.add_all(cycles)
@@ -28,6 +45,21 @@ def compare_query_result_tuple(result, expected_version):
 
 
 def version_pair(db_session, cycle, sub, plan_set, shifts):
+    """ Set up test function.
+
+    Creates PlanVersion instances, store them in db.
+
+    Arguments:
+        db_session: pytest fixture from pytest_flask_sqlalchemy.
+        cycle: BillingCycle instance.
+        sub: Subscription instance.
+        plan_set: 2 Plan instance.
+        shifts: day shifts for each PlanVersion.
+
+    Returns:
+        Tuple with 2 PlanVersion instances.
+
+    """
     s_date = cycle.start_date
     e_date = cycle.start_date + timedelta(days=shifts[0])
     old = PlanVersion(subscription=sub,
@@ -51,6 +83,12 @@ def version_pair(db_session, cycle, sub, plan_set, shifts):
 @pytest.mark.parametrize("subscription__versions", [[]])
 @pytest.mark.parametrize("subscription__status", [SubscriptionStatus.active])
 def test_get_subscribtion_plan(db_session, plans, cycles, subscription):
+    """Ping-Pong test for query.
+
+    Creates one PlanVersion instance.
+    Query returns it.
+
+    """
     sub = subscription
 
     version = PlanVersion(subscription=sub, plan=plans[0])
@@ -64,6 +102,10 @@ def test_get_subscribtion_plan(db_session, plans, cycles, subscription):
 
 @pytest.mark.parametrize("subscription__versions", [[]])
 def test_subscribtion_plan_overlapped_old(db_session, plans, cycles, subscription):
+    """Test for overlapped old plan with optimal.
+
+    Query should return only optimal plan.
+    """
     sub = subscription
     optimal = version_pair(db_session, cycles[0], sub, plans, (18, 0))
 
@@ -76,6 +118,11 @@ def test_subscribtion_plan_overlapped_old(db_session, plans, cycles, subscriptio
 
 @pytest.mark.parametrize("subscription__versions", [[]])
 def test_subscribtion_plan_overlapped_optimal(db_session, plans, cycles, subscription):
+    """Test for overlapped optimal plan with old.
+
+    Query should return optimal plan till its end
+        and old plan in rest of billing cycle.
+    """
     sub = subscription
     expected = version_pair(db_session, cycles[0], sub, plans, (30, 15))
 
@@ -88,6 +135,11 @@ def test_subscribtion_plan_overlapped_optimal(db_session, plans, cycles, subscri
 
 @pytest.mark.parametrize("subscription__versions", [[]])
 def test_subscribtion_plan_intersects(db_session, plans, cycles, subscription):
+    """Test for intersetion of optimal plan and old.
+
+    Query should return optimal plan till its end
+        and old plan in rest of billing cycle.
+    """
     sub = subscription
 
     expected = version_pair(db_session, cycles[0], sub, plans, (18, 10))
@@ -99,6 +151,11 @@ def test_subscribtion_plan_intersects(db_session, plans, cycles, subscription):
 
 @pytest.mark.parametrize("subscription__versions", [[]])
 def test_subscribtion_plan_gapped(db_session, plans, cycles, subscription):
+    """Test optimal plan and old with gap between them.
+
+    Query should return both of them without changes in dates.
+
+    """
     sub = subscription
     expected = version_pair(db_session, cycles[0], sub, plans, (10, 20))
 
@@ -110,6 +167,11 @@ def test_subscribtion_plan_gapped(db_session, plans, cycles, subscription):
 
 @pytest.mark.parametrize("subscription__versions", [[]])
 def test_subscribtion_plan_joined(db_session, plans, cycles, subscription):
+    """Test optimal plan and old chained in 1 day
+
+    Query should return both of them without changes in dates.
+
+    """
     sub = subscription
     expected = version_pair(db_session, cycles[0], sub, plans, (15, 15))
 
@@ -120,6 +182,12 @@ def test_subscribtion_plan_joined(db_session, plans, cycles, subscription):
 
 
 def test_subscribtion_plan_default(db_session, subscription_factory, plans, cycles):
+    """ Test of default query_subscription_plans execution.
+
+    Creates 5 Plan-Subscription pairs, store them in db.
+    Query should return them back in dictionary format {mb_available:[subscription_id]}.
+
+    """
     subs = subscription_factory.create_batch(5, versions=[], status=SubscriptionStatus.active)
     pv = [PlanVersion(subscription=sub, plan=plan) for sub, plan in zip(subs, plans)]
 
@@ -135,6 +203,12 @@ def test_subscribtion_plan_default(db_session, subscription_factory, plans, cycl
 
 
 def test_subscribtion_plan_default_for_not_active(db_session, subscription_factory, plans, cycles):
+    """ Test of default query_subscription_plans execution.
+
+    Creates 5 Plan-Subscription not active pairs, store them in db.
+    Query result shoul be empty.
+
+    """
     subs = subscription_factory.create_batch(5, versions=[], status=SubscriptionStatus.suspended)
     pv = [PlanVersion(subscription=sub, plan=plan) for sub, plan in zip(subs, plans)]
 

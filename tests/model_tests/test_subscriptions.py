@@ -1,3 +1,4 @@
+"""Subscription unit test module"""
 import pytest
 from datetime import date, timedelta, datetime
 from src.models.subscriptions import SubscriptionStatus
@@ -6,6 +7,12 @@ from tests.model_tests.test_cycles import db_cycles
 
 
 def test_activate_subscription(db_session, subscription):
+    """ Test subscription instance activation.
+
+    Instance should change status from default("new") to "active".
+    Also it should update activation and expiry date.
+
+    """
     sub = subscription
     assert sub.status == SubscriptionStatus.new
 
@@ -17,6 +24,11 @@ def test_activate_subscription(db_session, subscription):
 
 @pytest.mark.parametrize("subscription__status", [SubscriptionStatus.active])
 def test_activate_subscription_again(db_session, subscription):
+    """ Test subscription instance activation.
+
+    Instance should not be changed.
+
+    """
     sub = subscription
     assert sub.status == SubscriptionStatus.active
 
@@ -26,6 +38,11 @@ def test_activate_subscription_again(db_session, subscription):
 
 @pytest.mark.parametrize("subscription__status", [SubscriptionStatus.active])
 def test_activate_subscription_suspend(db_session, subscription):
+    """ Test subscription instance suspending.
+
+    Instance should change status only.
+
+    """
     sub = subscription
     assert sub.status == SubscriptionStatus.active
 
@@ -37,6 +54,11 @@ def test_activate_subscription_suspend(db_session, subscription):
 
 @pytest.mark.parametrize("subscription__versions", [[]])
 def test_select_effective_plan_for_subscription(db_cycles, subscription, plan_factory):
+    """ Test selecting effective plan dynamicly.
+
+    Instance should return a Plan with a minimal mb_available value.
+
+    """
     sub = subscription
     plans = plan_factory.create_batch(2)
     sub.activate_subscription()

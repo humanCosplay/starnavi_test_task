@@ -43,6 +43,7 @@ def lookup_all_local_min_in_timeline(cycle, result_set):
     for day in range((cycle.end_date - cycle.start_date).days):
         date = cycle.end_date - timedelta(days=day)
         local_min = lookup_min_plan(date, result_set)
+
         if local_min and local_min not in result:
             if result:
                 set_proper_start_date(result, local_min[2])

@@ -4,6 +4,14 @@ from src.models.cycles import BillingCycle
 
 
 class PlanVersion(db.Model):
+    """It's a ORM class that, represents Subscription-Plan relation.
+
+    For DB attributes see ERD.png file in the project's root
+    Help attributes:
+        subscription (Subscription): related subscription
+        plan (Plan): related Plan
+
+    """
     __tablename__ = "subscription_plan_versions"
 
     id = db.Column(db.Integer, primary_key=True)

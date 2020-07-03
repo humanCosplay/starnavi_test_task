@@ -1,5 +1,5 @@
 """
-Module for factory definitions for unit testing.
+Module for unit testing factory definitions.
 Factories generates ORM instances that defined in src.models.*
 """
 import factory
@@ -12,9 +12,9 @@ from src.models.subscriptions import Subscription, SubscriptionStatus
 
 class PlanVersionFactory(factory.Factory):
     """
-    PlanVersion generator for testing puprose.
-    It will create PlanVersion with billing cycle dates by default .
-    Uses Subscription and Plan factories.
+    PlanVersion ORM factory for testing puprose.
+
+    Depends on Subscription and Plan factories.
     """
     class Meta:
         model = PlanVersion
@@ -28,6 +28,12 @@ class PlanVersionFactory(factory.Factory):
 
 
 class SubscriptionFactory(factory.Factory):
+    """
+    Subscription ORM factory for testing puprose.
+
+    Has reverse dependency on PlanVersion factory,
+    that resolves after Subscription insctance creation
+    """
     class Meta:
         model = Subscription
 
@@ -44,6 +50,9 @@ class SubscriptionFactory(factory.Factory):
 
 
 class PlanFactory(factory.Factory):
+    """
+    Plan ORM factory for testing puprose.
+    """
     class Meta:
         model = Plan
 
@@ -56,6 +65,7 @@ class PlanFactory(factory.Factory):
 class BillingCycleFactory(factory.Factory):
     """
     BillingCycle generator for testing puprose.
+
     Each cycle instance will be 30 days period representation.
     """
     class Meta:

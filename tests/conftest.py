@@ -15,7 +15,7 @@ register(PlanVersionFactory)
 
 @pytest.fixture(scope="session")
 def app(request):
-    """ Create Flask testing app """
+    """ Create Flask testing app. """
 
     app = create_app(config.TestingConfiguration)
     return app
@@ -30,7 +30,7 @@ def client(app):
 
 @pytest.fixture(scope="session")
 def _db(app):
-    """ Fixture for transactional testing via pytest-flask-sqlalchemy """
+    """ Fixture for transactional testing via pytest-flask-sqlalchemy. """
 
     db.drop_all()
     db.create_all()

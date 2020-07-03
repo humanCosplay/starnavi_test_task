@@ -1,9 +1,9 @@
 """Subscription related models and database functionality"""
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from enum import Enum
 from sqlalchemy.dialects.postgresql import ENUM
 from src.models.base import db
-from src.models.service_codes import subscriptions_service_codes, Plan
+from src.models.service_codes import subscriptions_service_codes
 from src.models.usages import DataUsage
 from src.models.versions import PlanVersion
 
@@ -64,6 +64,13 @@ class Subscription(db.Model):
         return [code.name for code in self.service_codes]
 
     def activate_subscription(self):
+        """Set subscription.status as 'active'
+
+        Returns:
+            'datetime': activation_datetime of instance,
+            'bool': if method has activated instance.
+
+        """
         if self.status == SubscriptionStatus.active:
             return (self.activation_date, False)
 
@@ -74,6 +81,13 @@ class Subscription(db.Model):
         return (self.activation_date, True)
 
     def suspend_subscription(self):
+        """Set subscription.status as 'suspend'
+
+        Returns:
+            'datetime': expiry datetime of instance,
+            'bool': if method has suspended instance.
+
+        """
         if self.status == SubscriptionStatus.suspended:
             return (self.expiry_date, False)
 
@@ -81,12 +95,12 @@ class Subscription(db.Model):
         db.session.add(self)
         return (self.expiry_date, True)
 
-    def choose_plan(self, plan: Plan):
-        self.current_plan = plan
-        self.versions.append(PlanVersion(subscription=self, plan=plan))
-        db.session.add(self)
-
     def select_effective_plan(self, date):
+        """Selects currently effective plan
+
+        Returns:
+            'Plan': the most effective Plan instance by min mb_available
+        """
         def lookup_by_date(version, date):
             return version.start_effective_date <= date \
                 and version.end_effective_date >= date
