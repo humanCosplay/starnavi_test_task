@@ -40,6 +40,7 @@ class SubscriptionSchema(ma.SQLAlchemySchema):
 
 
 class SubscriptionQuerySchema(Schema):
+    """Schema class for quering Subscriptions."""
     id = fields.Integer()
     phone_number = fields.String()
     status = fields.String()
