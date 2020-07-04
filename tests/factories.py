@@ -37,7 +37,7 @@ class SubscriptionFactory(factory.Factory):
     class Meta:
         model = Subscription
 
-    phone_number = factory.Faker('phone_number')
+    phone_number = factory.Faker('msisdn')
     status = SubscriptionStatus.new
     activation_date = factory.Faker('past_date', start_date='-60d')
     expiry_date = factory.Faker('future_date', end_date='+60d')

@@ -7,8 +7,8 @@ class PlanSchema(ma.SQLAlchemySchema):
     """Schema class to handle serialization of plan data"""
     class Meta:
         model = Plan
-        include_fk = True
- 
+        load_instance = True
+
     id = ma.auto_field()
     description = ma.auto_field()
 
@@ -18,6 +18,7 @@ class ServiceCodeSchema(ma.SQLAlchemySchema):
     class Meta:
         model = ServiceCode
         include_fk = True
-    
+        load_instance = True
+
     name = ma.auto_field()
     description = ma.auto_field()

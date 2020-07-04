@@ -6,7 +6,7 @@ from flask_restful import Resource
 
 from src.models.subscriptions import Subscription
 from src.models.utils import get_object_or_404
-from src.schemas.subscriptions import SubscriptionSchema
+from src.schemas.subscriptions import SubscriptionSchema, SubscriptionQuerySchema
 
 
 class SubscriptionAPI(Resource):
@@ -26,13 +26,13 @@ class SubscriptionAPI(Resource):
         """
         subscription = get_object_or_404(Subscription, sid)
         result = SubscriptionSchema().dump(subscription)
-        return jsonify(result.data)
+        return jsonify(result)
 
 
 class SubscriptionListAPI(Resource):
     """Resource/routes for subscriptions endpoints"""
 
-    @use_kwargs(SubscriptionSchema(partial=True), locations=("query",))
+    @use_kwargs(SubscriptionQuerySchema(partial=True), locations=("query",))
     def get(self, **kwargs):
         """External facing subscription list endpoint GET
 
@@ -47,4 +47,4 @@ class SubscriptionListAPI(Resource):
         """
         subscriptions = Subscription.get_subscriptions(**kwargs)
         result = SubscriptionSchema().dump(subscriptions, many=True)
-        return jsonify(result.data)
+        return jsonify(result)

@@ -22,7 +22,7 @@ class Subscription(db.Model):
     __tablename__ = "subscriptions"
 
     id = db.Column(db.Integer, primary_key=True)
-    phone_number = db.Column(db.String(10))
+    phone_number = db.Column(db.String(15))
     status = db.Column(ENUM(SubscriptionStatus),
                        default=SubscriptionStatus.new)
     activation_date = db.Column(db.TIMESTAMP(timezone=True), nullable=True)
@@ -39,8 +39,7 @@ class Subscription(db.Model):
     def __repr__(self):  # pragma: no cover
         return (
             f"<{self.__class__.__name__}: {self.id} ({self.status}), "
-            f"phone_number: {self.phone_number or '[no phone number]'}, ",
-            f"plan: {self.plan_id}>"
+            f"phone_number: {self.phone_number or '[no phone number]'}, "
         )
 
     @classmethod
@@ -56,7 +55,7 @@ class Subscription(db.Model):
             list: objects returned from query result
 
         """
-        return cls.query.filter(**kwargs).all()
+        return cls.query.filter_by(**kwargs).all()
 
     @property
     def service_code_names(self):
