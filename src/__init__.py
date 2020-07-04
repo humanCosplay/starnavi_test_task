@@ -37,4 +37,7 @@ def create_app(config_obj=None):
     from src.routes import register_routes
     register_routes(app)
 
+    from src.admin_app import admin
+    admin.init_app(app)
+
     return app
