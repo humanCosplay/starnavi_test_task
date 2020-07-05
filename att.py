@@ -9,7 +9,6 @@ from src import create_app
 
 app = create_app(config.DevelopmentConfig)
 
-
 @app.shell_context_processor
 def make_shell_context():
     """Adds imports to default shell context for easier use"""
@@ -18,10 +17,12 @@ def make_shell_context():
     from src.models.service_codes import Plan, ServiceCode
     from src.models.subscriptions import Subscription
     from src.models.usages import DataUsage
+    from cli import db_init
 
     return {
         "BillingCycle": BillingCycle,
         "db": db,
+        "db_init": db_init,
         "Plan": Plan,
         "ServiceCode": ServiceCode,
         "Subscription": Subscription,

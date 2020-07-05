@@ -5,7 +5,6 @@ from sqlalchemy.dialects.postgresql import ENUM
 from src.models.base import db
 from src.models.service_codes import subscriptions_service_codes
 from src.models.usages import DataUsage
-from src.models.versions import PlanVersion
 
 
 class SubscriptionStatus(Enum):
@@ -34,7 +33,6 @@ class Subscription(db.Model):
         back_populates="subscriptions", cascade="all,delete", lazy="subquery"
     )
     data_usages = db.relationship(DataUsage, back_populates="subscription")
-    versions = db.relationship(PlanVersion, back_populates="subscription")
 
     def __repr__(self):  # pragma: no cover
         return (

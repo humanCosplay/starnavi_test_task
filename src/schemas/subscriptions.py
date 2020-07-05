@@ -36,7 +36,7 @@ class SubscriptionSchema(ma.SQLAlchemySchema):
         """Returns effective plan only"""
         plan = obj.select_effective_plan(datetime.now())
         schema = PlanSchema()
-        return schema.dump(plan)
+        return schema.dump(plan) if plan else {}
 
 
 class SubscriptionQuerySchema(Schema):
